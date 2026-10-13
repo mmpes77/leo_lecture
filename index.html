@@ -19,6 +19,7 @@
     --hold: #d29922;
     --reset: #f0883e;
     --fail: #da5b5b;
+    --calm: #4fb8a8;
     --mono: 'DM Mono', ui-monospace, 'SF Mono', Menlo, monospace;
     --sans: 'Inter', -apple-system, system-ui, sans-serif;
   }
@@ -198,8 +199,8 @@
   .protein-toggle:hover { color: var(--ink-dim); }
   .protein-list-full { display: none; }
   .protein-list-full.show { display: block; }
-  .rec .tag { font-size: 10px; font-family: var(--mono); font-weight: 500; padding: 2px 7px;
-    border-radius: 5px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .rec .tag, .lift-head .tag { font-size: 10px; font-family: var(--mono); font-weight: 500; padding: 2px 7px;
+    border-radius: 5px; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
   .tag.up { background: rgba(63,185,80,0.15); color: var(--go); }
   .tag.hold { background: rgba(210,153,34,0.15); color: var(--hold); }
   .tag.reset { background: rgba(240,136,62,0.15); color: var(--reset); }
@@ -207,6 +208,24 @@
   .tag.down { background: rgba(240,136,62,0.15); color: var(--reset); }
   .tag.streak { background: rgba(74,144,217,0.15); color: var(--steel-glow); }
   .tag.log { background: rgba(106,169,232,0.15); color: var(--steel-glow); }
+  .tag.light { background: rgba(79,184,168,0.15); color: var(--calm); }
+
+  .mode-toggle { display: grid; grid-template-columns: 1fr 1fr; margin: 2px 0 8px;
+    border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .mode-toggle button { background: var(--panel); color: var(--ink-dim); border: 0;
+    padding: 12px 8px; font: 600 14px var(--sans); cursor: pointer; }
+  .mode-toggle button + button { border-left: 1px solid var(--line); }
+  .mode-toggle button.active[data-mode="lower"] { background: var(--steel); color: #fff; }
+  .mode-toggle button.active[data-mode="upper"] { background: var(--calm); color: #062420; }
+  .grp-label { margin-top: 20px; }
+  #lbl-heavy { margin-top: 4px; }
+  .mode-toggle button:focus-visible { outline: 2px solid var(--steel-glow); outline-offset: -2px; }
+  .mode-hint { font-size: 12px; color: var(--ink-dim); margin: 0 2px 14px; line-height: 1.55; }
+  .mode-hint b { color: var(--ink); font-weight: 600; }
+  .rec .base { display: block; font-size: 10.5px; color: var(--ink-faint); text-align: right; }
+  .rec.light .wt { color: var(--calm); }
+  .sess-light { font-family: var(--mono); font-size: 10px; padding: 1px 6px; border-radius: 4px;
+    background: rgba(79,184,168,0.15); color: var(--calm); flex-shrink: 0; }
 
   .sets { display: flex; gap: 8px; flex-wrap: wrap; }
   .setbox { flex: 1; min-width: 70px; }
@@ -471,6 +490,11 @@
 
   <div class="view active" id="view-today">
     <div class="section-label">무분할 · 다음 세션</div>
+    <div class="mode-toggle" id="modeToggle" role="group" aria-label="세션 종류">
+      <button type="button" data-mode="lower">하체 무거운 날</button>
+      <button type="button" data-mode="upper">상체 무거운 날</button>
+    </div>
+    <div class="mode-hint" id="modeHint"></div>
     <div id="lifts"></div>
 
     <button class="bigbtn primary" id="saveAll">전체 세션 저장 ↓</button>
@@ -546,9 +570,25 @@
     <div class="section-label">이 루틴의 원칙</div>
 
     <div class="guide-card">
+      <h3>하체 데이 / 상체 데이 (10월~)</h3>
+      <p>매 세션 모든 종목을 최대치로 밀던 방식에서, <b>그날 한 부위만 무겁게</b> 하는 방식으로 바꿨다. 상체가 6주 가까이 정체됐고, 데드 뒤에 하는 랫풀·OHP가 그립·체력 부족으로 무너지는 기록이 반복돼서다.</p>
+      <ul>
+        <li><b>하체 데이</b> (휴무): 데드·불스스 무겁게(판정) → 벤치·랫풀·숄더프레스는 약 80~85%로 가볍게</li>
+        <li><b>상체 데이</b> (야간 출근 전): 벤치·랫풀·숄더프레스 무겁게(판정) → 데드·불스스는 가볍게</li>
+        <li>무겁게 하는 종목을 먼저 한다. 앱이 순서도 그렇게 바꿔서 보여준다</li>
+        <li>판정은 무겁게 한 종목에만. 데드·벤치는 무겁게 한 날 성공하면 바로 +2.5kg</li>
+        <li>앱은 직전 세션의 반대 부위로 자동 선택한다. 다르면 위 버튼으로 바꾸면 된다</li>
+        <li>무겁게 하는 날에도 <b>깔릴 것 같은 렙은 하지 않는다.</b> 거기서 끝내고 미달로 기록</li>
+        <li>가볍게 한 기록은 추이 그래프에서 빠진다</li>
+      </ul>
+      <p class="src">부위별로는 4일에 무거운 날 1번, 가벼운 날 1번이라 증량 속도는 예전과 같다</p>
+    </div>
+
+    <div class="guide-card">
       <h3>목표 &amp; 현실성</h3>
-      <p>하반기(약 5~6개월) 목표는 <b>골격근량 +1.5~3kg</b>. 식사·수면·점진적 과부하를 지키면 성공 가능성 <b>약 75~85%</b>. +3kg 이상 공격적 목표는 40~50% 구간이라, 상단은 보너스로 본다.</p>
-      <p class="src">시작 체성분: 70.8kg · 골격근 34.4kg · 체지방 10.0kg (체지방률 ≈14%)</p>
+      <p>하반기 목표는 <b>골격근량 +1.5~3kg</b>. 9/30 측정 기준 누적 <b>+0.6kg</b>(8월 +1.1, 9월 −0.5)이라 남은 10~12월에 +0.9kg이 더 필요하다.</p>
+      <p>10월 기준 성공 가능성: 하한 +1.5kg <b>약 60~65%</b> (근력 주 3회·단백질 유지 전제), 상한 +3kg은 5% 미만.</p>
+      <p class="src">시작 체성분 7/27: 70.8kg · 골격근 34.4kg · 체지방 10.0kg → 9/30: 73.0 · 35.0 · 11.5</p>
     </div>
 
     <div class="guide-card">
@@ -679,15 +719,27 @@
 // target: 목표 렙, sets: 세트 수
 // mode 'weight' = 무게 증량형, mode 'rep' = 렙 먼저 늘리는 형(불스스)
 const LIFTS = [
-  { id:'dead',  name:'데드리프트',        inc:2.5,  target:5, sets:3, mode:'weight', start:70,   rest:120, successNeeded:2, sub:'스미스/바벨 · 2회 성공 후 증량 · 휴식 2분' },
-  { id:'bench', name:'벤치프레스',        inc:2.5,  target:5, sets:3, mode:'weight', start:22.5, rest:90,  successNeeded:2, sub:'2회 성공 후 증량 · 휴식 1:30' },
+  { id:'dead',  name:'데드리프트',        inc:2.5,  target:5, sets:3, mode:'weight', start:70,   rest:120, sub:'무거운 날 성공 시 증량 · 휴식 2분' },
+  { id:'bench', name:'벤치프레스',        inc:2.5,  target:5, sets:3, mode:'weight', start:22.5, rest:90,  sub:'무거운 날 성공 시 증량 · 휴식 1:30' },
   { id:'bss_smith', name:'불가리안 스플릿 스쿼트(스미스)', inc:2.5, target:8, sets:2, mode:'weight', start:40, rest:90, sub:'봉 20kg 포함 · 2세트 · 휴식 1:30' },
   { id:'lat',   name:'랫풀다운',          inc:5,    target:8, sets:3, mode:'weight', start:35,   rest:90,  sub:'풀업 준비 · 휴식 1:30' },
-  { id:'ohp_machine', name:'숄더프레스(머신)', inc:2.5, target:8, repCap:10, sets:3, mode:'rep', start:17.5, rest:90, sub:'좌우 분리형 · 편당 무게 · 8→10렙 채우고 증량 · 휴식 1:30' },
+  { id:'ohp_machine', name:'숄더프레스(머신)', inc:5, target:6, repCap:12, sets:3, mode:'rep', start:20, rest:90, sub:'핀스택 5kg 단위 · 스택 숫자 그대로 · 6→12렙 채우고 +5kg · 휴식 1:30' },
   { id:'ohp',   name:'오버헤드프레스(바벨)', inc:2.5,  target:8, sets:3, mode:'weight', start:15,   rest:90,  sub:'옵션 · 머신으로 대체 중 · 휴식 1:30', optional:true },
   { id:'lat_raise', name:'사이드 레터럴 레이즈', inc:1, target:12, sets:3, mode:'weight', start:2, rest:60, sub:'옵션 · 어깨 측면 고립 · 휴식 1분', optional:true },
   { id:'neg_pullup', name:'네거티브 풀업', mode:'log', target:3, repFloor:2, repCap:8, sets:3, rest:100, sub:'옵션 · 맨몸 · 3~5초 천천히 내려오기 · 휴식 100초', optional:true },
 ];
+
+// ---- 가벼운 날(주기화) 설정 ----
+// 무거운 날 목표 무게의 pct 만큼, 렙은 reps 로. 증량 판정은 하지 않는다.
+const LIGHT = {
+  dead:        { pct:0.80, reps:5  },
+  bench:       { pct:0.82, reps:8  },
+  bss_smith:   { pct:0.84, reps:8  },
+  lat:         { pct:0.80, reps:10 },
+  ohp_machine: { pct:0.85, reps:12 },
+  ohp:         { pct:0.85, reps:8  },
+  lat_raise:   { pct:0.75, reps:15 },
+};
 
 const KEY = 'workout_log_v1';
 function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ return {}; } }
@@ -709,8 +761,9 @@ function saveDraft(){
     document.querySelectorAll('#lifts .lift-note').forEach(inp => {
       if(inp.value.trim()!=='') notes[inp.dataset.note] = inp.value;
     });
-    if(!Object.keys(reps).length && !Object.keys(notes).length){ localStorage.removeItem(DRAFT_KEY); return; }
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({ ts:Date.now(), reps, notes }));
+    const modeChanged = !modeAuto || Object.keys(lightOverride).length>0;
+    if(!Object.keys(reps).length && !Object.keys(notes).length && !modeChanged){ localStorage.removeItem(DRAFT_KEY); return; }
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ ts:Date.now(), reps, notes, mode:sessionMode, modeAuto, lightOverride }));
   } catch(e){ console.error('임시 저장 실패:', e); }
 }
 
@@ -718,9 +771,13 @@ function clearDraft(){ try { localStorage.removeItem(DRAFT_KEY); } catch(e){} }
 
 function restoreDraft(){
   let draft;
-  try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY)); } catch(e){ return; }
-  if(!draft || !draft.ts) return;
-  if(Date.now() - draft.ts > DRAFT_MAX_AGE){ clearDraft(); return; } // 너무 오래된 초안은 무시
+  try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY)); } catch(e){ draft = null; }
+  if(draft && draft.ts && Date.now() - draft.ts > DRAFT_MAX_AGE){ clearDraft(); draft = null; } // 너무 오래된 초안은 무시
+  if(!draft || !draft.ts){ setMode(defaultMode(), { auto:true }); return; }
+
+  // 모드·오늘 무게 조정부터 복원 (카드 표시가 여기에 따라 달라짐)
+  lightOverride = draft.lightOverride || {};
+  setMode(draft.mode || defaultMode(), { keepOverride:true, auto: draft.modeAuto!==false });
 
   let restored=0;
   Object.entries(draft.reps||{}).forEach(([liftId, sets]) => {
@@ -763,6 +820,92 @@ const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 
 function fmt(n){ return Number.isInteger(n) ? n : n.toFixed(2).replace(/\.?0+$/,''); }
+
+// ---- 하체 데이 / 상체 데이 (부위별 주기화) ----
+// 그날 집중하는 부위는 무겁게(판정), 나머지 부위는 가볍게(판정 없음).
+// 기본값은 직전 세션의 반대 (휴무=하체, 야간 출근 전=상체로 번갈아 가는 근무표에 맞춤)
+const GROUP = { dead:'lower', bss_smith:'lower', bench:'upper', lat:'upper', ohp_machine:'upper', ohp:'upper', lat_raise:'upper' };
+const FOCUS_LABEL = { lower:'하체', upper:'상체' };
+
+function defaultMode(){
+  const last = db.history[0];
+  if(last && (last.focus==='lower' || last.focus==='upper')) return last.focus==='lower' ? 'upper' : 'lower';
+  return 'lower';
+}
+let sessionMode = defaultMode();
+let lightOverride = {}; // 가볍게 하는 종목의 오늘 무게를 손으로 조정한 값 (current는 건드리지 않음)
+let modeAuto = true;    // 사용자가 직접 고르지 않았으면 true (힌트 문구용)
+
+// 이 종목이 오늘 "가볍게" 하는 종목인지
+function isLight(l){
+  return l.mode!=='log' && !!GROUP[l.id] && GROUP[l.id]!==sessionMode;
+}
+
+function lightWeightFor(l, c){
+  if(lightOverride[l.id]!=null) return lightOverride[l.id];
+  const cfg = LIGHT[l.id];
+  if(!cfg) return c.weight;
+  const step = l.inc || 2.5;
+  let w = Math.round(c.weight*cfg.pct/step)*step;
+  if(w < step) w = step;
+  return Math.round(w*100)/100;
+}
+// 오늘 실제로 들 무게
+function workingWeightFor(l, c){
+  if(l.mode==='log') return null;
+  return isLight(l) ? lightWeightFor(l, c) : c.weight;
+}
+// 오늘 목표 렙
+function goalRepsFor(l, c){
+  if(isLight(l) && LIGHT[l.id]) return LIGHT[l.id].reps;
+  return (l.mode==='rep' || l.mode==='log') ? c.repTarget : l.target;
+}
+
+function renderModeToggle(){
+  $$('#modeToggle button').forEach(b => {
+    const on = b.dataset.mode===sessionMode;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  const last = db.history[0];
+  const heavyF = FOCUS_LABEL[sessionMode];
+  const lightF = FOCUS_LABEL[sessionMode==='lower' ? 'upper' : 'lower'];
+  let why = '';
+  if(modeAuto) why = (last && last.focus) ? ` (직전 ${last.date}이 ${FOCUS_LABEL[last.focus]} 데이라 자동 선택)` : ' (기본값)';
+  $('#modeHint').innerHTML =
+    `<b>${heavyF}</b>는 무겁게 · 판정 있음 · 깔릴 것 같은 렙은 하지 말고 미달로 기록<br>` +
+    `<b>${lightF}</b>는 약 80~85%로 가볍게 · 판정 없음 · 2~3개 여유 남기기${why}`;
+}
+
+// 무겁게 하는 종목을 위로, 가볍게 하는 종목을 아래로 (노드만 옮기므로 입력값은 보존)
+function orderCards(){
+  const box = $('#lifts'); if(!box) return;
+  const main = LIFTS.filter(l => !l.optional);
+  const opt  = LIFTS.filter(l => l.optional);
+  const lightF = FOCUS_LABEL[sessionMode==='lower' ? 'upper' : 'lower'];
+  const seq = [];
+  const lh = document.getElementById('lbl-heavy');
+  if(lh){ lh.textContent = `${FOCUS_LABEL[sessionMode]} · 무겁게`; seq.push(lh); }
+  main.filter(l => !isLight(l)).forEach(l => seq.push(document.getElementById('lift-'+l.id)));
+  const ll = document.getElementById('lbl-light');
+  if(ll){ ll.textContent = `${lightF} · 가볍게 (판정 없음)`; seq.push(ll); }
+  main.filter(l => isLight(l)).forEach(l => seq.push(document.getElementById('lift-'+l.id)));
+  const oh = document.getElementById('optHeader'); if(oh) seq.push(oh);
+  opt.forEach(l => seq.push(document.getElementById('lift-'+l.id)));
+  seq.filter(Boolean).forEach(n => box.appendChild(n));
+}
+
+function setMode(mode, opts){
+  opts = opts || {};
+  if(mode!=='lower' && mode!=='upper') mode = defaultMode();
+  sessionMode = mode;
+  if(!opts.keepOverride) lightOverride = {};
+  if(opts.auto!==undefined) modeAuto = opts.auto;
+  renderModeToggle();
+  // 입력값 보존을 위해 카드 표시부만 갱신하고, 순서만 재배치
+  LIFTS.forEach(l => updateLiftCardDisplay(l.id));
+  orderCards();
+}
 
 // ---- 체성분 표시/수정 ----
 function renderBodyStats(){
@@ -815,12 +958,12 @@ function recBlockFor(l, c, goalReps){
         <button class="wt-adj" data-repadj="${l.id}" data-dir="1">+</button>
         <span class="goal">체중 × ${l.sets}세트</span>
       </div>`
-    : `<div class="rec">
-        <span class="lab">목표</span>
+    : `<div class="rec${isLight(l)?' light':''}">
+        <span class="lab">${isLight(l)?'가볍게':'목표'}</span>
         <button class="wt-adj" data-wadj="${l.id}" data-dir="-1">−</button>
-        <span class="wt" data-wtset="${l.id}">${fmt(c.weight)}<small>kg</small></span>
+        <span class="wt" data-wtset="${l.id}">${fmt(workingWeightFor(l, c))}<small>kg</small></span>
         <button class="wt-adj" data-wadj="${l.id}" data-dir="1">+</button>
-        <span class="goal">${goalReps} × ${l.sets}</span>
+        <span class="goal">${goalReps} × ${l.sets}${isLight(l)?`<span class="base">기준 ${fmt(c.weight)}kg</span>`:''}</span>
       </div>`;
 }
 
@@ -897,6 +1040,7 @@ function lastNoteFor(liftId){
 function wasJustReset(liftId){
   for(const sess of db.history){
     const e = sess.entries.find(x=>x.liftId===liftId);
+    if(e && e.light) continue; // 가벼운 날은 판정이 없으므로 건너뜀
     if(e) return !!(e.action && e.action.includes('리셋'));
   }
   return false;
@@ -905,6 +1049,7 @@ function wasJustReset(liftId){
 // 종목 카드 상단 태그 (renderLifts / updateLiftCardDisplay 공용)
 function tagFor(l, c){
   if(l.mode==='log') return '<span class="tag log">기록형</span>';
+  if(isLight(l)) return '<span class="tag light">가볍게</span>';
   if(l.optional) return '<span class="tag opt">옵션</span>';
   if(c.failStreak>=2) return '<span class="tag reset">리셋 임박</span>';
   if(c.failStreak===1) return '<span class="tag hold">한번 더</span>';
@@ -924,7 +1069,7 @@ function updateLiftCardDisplay(liftId){
   const card = document.getElementById('lift-'+liftId);
   if(!l || !c || !card) return;
 
-  const goalReps = (l.mode==='rep' || l.mode==='log') ? c.repTarget : l.target;
+  const goalReps = goalRepsFor(l, c);
 
   // 태그 갱신
   const tag = tagFor(l, c);
@@ -947,15 +1092,15 @@ function updateLiftCardDisplay(liftId){
   });
 
   // 정체 경고 갱신
-  const streakNote = (l.mode!=='log' && c.failStreak>0)
-    ? `<div class="note streak">⚠ 이 무게에서 ${c.failStreak}세션 연속 미달${c.failStreak>=2?' — 다음도 실패 시 10% 리셋('+fmt(Math.round(c.weight*0.9*4)/4)+'kg) 제안':''}</div>`
+  const streakNote = (l.mode!=='log' && c.failStreak>0 && !isLight(l))
+    ? `<div class="note streak">⚠ 이 무게에서 ${c.failStreak}세션 연속 미달${c.failStreak>=2?' — 다음도 실패 시 '+resetLabelFor(l, c):''}</div>`
     : '';
   const oldStreak = card.querySelector('.note.streak');
   if(oldStreak) oldStreak.remove();
   if(streakNote) card.insertAdjacentHTML('beforeend', streakNote);
 
   // 웜업 가이드 갱신 (펼침/접힘 상태는 초기화되지만 표시 무게는 항상 정확해야 하므로 갱신)
-  const warmupSteps = getWarmupSteps(l, l.mode==='log' ? null : c.weight);
+  const warmupSteps = getWarmupSteps(l, workingWeightFor(l, c));
   const oldWarmup = card.querySelector('.warmup-block');
   if(oldWarmup) oldWarmup.remove();
   if(warmupSteps){
@@ -973,14 +1118,15 @@ function updateLiftCardDisplay(liftId){
 
 function renderLifts(){
   const box = $('#lifts'); box.innerHTML='';
+  box.insertAdjacentHTML('beforeend', '<div class="section-label grp-label" id="lbl-heavy"></div><div class="section-label grp-label" id="lbl-light"></div>');
   let optionalHeaderShown=false;
   LIFTS.forEach(l => {
     const c = db.current[l.id];
-    const goalReps = (l.mode==='rep' || l.mode==='log') ? c.repTarget : l.target;
+    const goalReps = goalRepsFor(l, c);
     const tag = tagFor(l, c);
 
     if(l.optional && !optionalHeaderShown){
-      box.insertAdjacentHTML('beforeend', `<div class="section-label" style="margin-top:22px">추가 보조 종목 (선택)</div>`);
+      box.insertAdjacentHTML('beforeend', `<div class="section-label" id="optHeader" style="margin-top:22px">추가 보조 종목 (선택)</div>`);
       optionalHeaderShown=true;
     }
 
@@ -993,11 +1139,11 @@ function renderLifts(){
         <input type="number" inputmode="numeric" data-lift="${l.id}" data-set="${i}" placeholder="${goalReps}">
         <button class="done-btn${last?' last':''}" data-rest="${l.id}" data-set="${i}" data-goal="${goalReps}"${last?' data-notimer="1"':''}>${btnLabel}</button></div>`;
     }
-    const streakNote = (l.mode!=='log' && c.failStreak>0)
-      ? `<div class="note streak">⚠ 이 무게에서 ${c.failStreak}세션 연속 미달${c.failStreak>=2?' — 다음도 실패 시 10% 리셋('+fmt(Math.round(c.weight*0.9*4)/4)+'kg) 제안':''}</div>`
+    const streakNote = (l.mode!=='log' && c.failStreak>0 && !isLight(l))
+      ? `<div class="note streak">⚠ 이 무게에서 ${c.failStreak}세션 연속 미달${c.failStreak>=2?' — 다음도 실패 시 '+resetLabelFor(l, c):''}</div>`
       : '';
 
-    const warmupSteps = getWarmupSteps(l, l.mode==='log' ? null : c.weight);
+    const warmupSteps = getWarmupSteps(l, workingWeightFor(l, c));
     const warmupBlock = warmupSteps
       ? `<div class="warmup-block">
           <div class="warmup-toggle" data-warmup-toggle="${l.id}">
@@ -1039,6 +1185,21 @@ function renderLifts(){
         ${streakNote}
       </div>`);
   });
+  orderCards();
+}
+
+// 3회 미달 시 되돌릴 무게: 약 10% 낮추되 그 종목의 증량 단위(원판·핀 간격)에 맞춤
+function resetWeightFor(l, c){
+  const step = l.inc || 2.5;
+  let w = Math.round(c.weight*0.9/step)*step;
+  if(w >= c.weight) w = c.weight - step;   // 단위가 커서 그대로면 한 칸 내림
+  if(w < step) w = step;
+  return Math.round(w*100)/100;
+}
+// 렙형 종목은 목표 렙이 시작 렙보다 높으면 무게 대신 렙부터 되돌림
+function resetIsRepsOnly(l, c){ return l.mode==='rep' && c.repTarget > l.target; }
+function resetLabelFor(l, c){
+  return resetIsRepsOnly(l, c) ? `${l.target}렙부터 다시` : `10% 리셋(${fmt(resetWeightFor(l, c))}kg)`;
 }
 
 function evalLift(l, reps){
@@ -1070,9 +1231,14 @@ function evalLift(l, reps){
     c.failStreak += 1;
     c.successStreak = 0; // 실패하면 연속 성공 카운트 초기화
     if(c.failStreak>=3){
-      const reset = Math.round(c.weight*0.9*4)/4;
-      c.weight = reset; c.failStreak=0; if(l.mode==='rep') c.repTarget=l.target;
-      result.action=`3세션 미달 → 10% 리셋 ${fmt(reset)}kg`;
+      if(resetIsRepsOnly(l, c)){
+        c.repTarget = l.target; c.failStreak = 0;
+        result.action = `3세션 미달 → ${l.target}렙부터 다시 (${fmt(c.weight)}kg 유지)`;
+      } else {
+        const reset = resetWeightFor(l, c);
+        c.weight = reset; c.failStreak=0; if(l.mode==='rep') c.repTarget=l.target;
+        result.action=`3세션 미달 → 10% 리셋 ${fmt(reset)}kg`;
+      }
     } else {
       result.action=`유지 (${c.failStreak}/3 미달)`;
     }
@@ -1111,6 +1277,10 @@ function saveSession(){
         if(l.mode==='log'){
           // 순수 기록형: 판정/진행 로직 없이 세트·렙·메모만 저장
           entries.push({ lift:l.name, liftId:l.id, reps, action:'기록됨', note, isLog:true });
+        } else if(isLight(l)){
+          // 가볍게 하는 종목: 판정·무게 변경 없이 기록만. before가 없으므로 되돌려도 current는 그대로.
+          const w = workingWeightFor(l, db.current[l.id]);
+          entries.push({ lift:l.name, liftId:l.id, weight:w, reps, action:'가볍게 · 판정 없음', note, light:true, heavyRef: db.current[l.id].weight });
         } else {
           // 판정 전 상태 스냅샷 (되돌리기용)
           const before = JSON.parse(JSON.stringify(db.current[l.id]));
@@ -1140,7 +1310,8 @@ function saveSession(){
   const savedIds = new Set(entries.map(e=>e.liftId));
   const missingButTyped = Object.keys(rawSnapshot).filter(id => !savedIds.has(id));
 
-  db.history.unshift({ date:dateStr, ts:Date.now(), entries, rawSnapshot, incomplete: missingButTyped.length>0 || errored.length>0 });
+  const savedFocus = sessionMode;
+  db.history.unshift({ date:dateStr, ts:Date.now(), entries, rawSnapshot, incomplete: missingButTyped.length>0 || errored.length>0, focus: savedFocus });
   if(db.history.length>60) db.history.pop();
   save(db);
   Object.keys(timers).forEach(id=>stopRest(id)); // 타이머 정리
@@ -1149,12 +1320,14 @@ function saveSession(){
   $$('input[data-lift]').forEach(i=>{ i.value=''; markSetFilled(i); });
   clearDraft(); // 저장/초기화 완료 → 임시 보관분 정리
   $$('.lift-note').forEach(i=>i.value='');
+  setMode(defaultMode(), { auto:true }); // 다음 세션은 반대 종류로 자동 전환
 
   if(errored.length || missingButTyped.length){
     const names = [...errored, ...missingButTyped.map(id => (LIFTS.find(l=>l.id===id)||{}).name).filter(Boolean)];
     toast(`저장됨 · ${entries.length}개 종목 (⚠ ${[...new Set(names)].join(', ')} 확인 필요)`, true);
   } else {
-    toast(`세션 저장 완료 · ${entries.length}개 종목 갱신됨`);
+    const nHeavy = entries.filter(e => !e.light && !e.isLog).length;
+    toast(`${FOCUS_LABEL[savedFocus]} 데이 저장 · ${entries.length}개 종목 (판정 ${nHeavy}개)`);
   }
 }
 
@@ -1250,6 +1423,7 @@ function renderHistory(){
           <div class="sess-head" data-toggle="${sIdx}">
             <span class="sess-date">${sess.date}<small class="sess-weekday">(${weekday})</small></span>
             ${warnBadge}
+            ${sess.focus ? `<span class="sess-light">${FOCUS_LABEL[sess.focus]}</span>` : ''}
             <span class="sess-summary">${summary}</span>
             <span class="sess-caret">${expanded?'▾':'▸'}</span>
           </div>
@@ -1418,6 +1592,14 @@ $('#lifts').addEventListener('click', e => {
     const c=db.current[lift.id];
     const step = lift.inc;
     const dir = parseInt(wadj.dataset.dir);
+    if(isLight(lift)){
+      // 가볍게 하는 종목: 오늘 들 무게만 조정 (무겁게 할 때 목표·판정 카운트는 그대로)
+      let lw = Math.round((lightWeightFor(lift, c) + step*dir)*100)/100;
+      if(lw < step) lw = step;
+      lightOverride[lift.id] = lw;
+      updateLiftCardDisplay(lift.id); saveDraft();
+      return;
+    }
     let nw = Math.round((c.weight + step*dir)*100)/100;
     if(nw < step) nw = step; // 최소 무게 하한
     c.weight = nw;
@@ -1440,10 +1622,17 @@ $('#lifts').addEventListener('click', e => {
   if(wtset){
     const lift=LIFTS.find(l=>l.id===wtset.dataset.wtset);
     const c=db.current[lift.id];
-    const input=prompt(`${lift.name} 목표 무게를 정확히 입력 (kg)`, c.weight);
+    const light = isLight(lift);
+    const input=prompt(light ? `${lift.name} 오늘(가볍게) 무게 (kg)` : `${lift.name} 목표 무게를 정확히 입력 (kg)`, light ? lightWeightFor(lift, c) : c.weight);
     if(input===null) return; // 취소
     const nw=parseFloat(input);
     if(isNaN(nw)||nw<=0){ toast('올바른 숫자를 입력해줘', true); return; }
+    if(light){
+      lightOverride[lift.id] = Math.round(nw*100)/100;
+      updateLiftCardDisplay(lift.id); saveDraft();
+      toast(`오늘 ${lift.name} ${fmt(lightOverride[lift.id])}kg (무겁게 할 때 목표는 그대로)`);
+      return;
+    }
     c.weight = Math.round(nw*100)/100;
     c.failStreak = 0; c.successStreak = 0; // 수동 설정 시 카운트 초기화
     save(db); updateLiftCardDisplay(lift.id); // 전체 재렌더 대신 해당 카드만 갱신
@@ -1453,6 +1642,12 @@ $('#lifts').addEventListener('click', e => {
 });
 
 $('#saveAll').addEventListener('click', saveSession);
+$('#modeToggle').addEventListener('click', e => {
+  const b = e.target.closest('[data-mode]');
+  if(!b || b.dataset.mode===sessionMode) return;
+  setMode(b.dataset.mode, { auto:false });
+  saveDraft();
+});
 
 // ---- 백업 내보내기 / 불러오기 ----
 function exportBackup(){
@@ -1485,6 +1680,7 @@ function importBackup(file){
       Object.keys(timers).forEach(id=>stopRest(id));
       for(const k in timers) delete timers[k];
       renderLifts(); renderHistory(); renderCardio(); renderProtein(); renderBodyStats();
+      setMode(defaultMode(), { auto:true });
       toast('백업 복원 완료');
     } catch(err){
       toast('불러오기 실패 · 파일 확인', true);
@@ -1507,6 +1703,7 @@ function resetAll(){
   $$('input[data-lift]').forEach(i=>{ i.value=''; markSetFilled(i); });
   clearDraft(); // 저장/초기화 완료 → 임시 보관분 정리
   renderLifts(); renderHistory(); renderCardio(); renderProtein(); renderBodyStats();
+  setMode('lower', { auto:true });
   toast('초기화 완료 · 시작 무게로 리셋');
 }
 $('#resetBtn').addEventListener('click', resetAll);
@@ -1565,7 +1762,7 @@ function getLiftTrendData(liftId){
   const chronological = [...db.history].reverse();
   chronological.forEach(sess => {
     const entry = sess.entries.find(e => e.liftId === liftId);
-    if(entry){
+    if(entry && !entry.light){ // 가벼운 날은 진행 추이에서 제외
       const w = entry.before ? entry.before.weight : entry.weight;
       const maxRep = entry.reps && entry.reps.length ? Math.max(...entry.reps) : 0;
       const goalHit = entry.action && (entry.action.includes('+') || entry.action.includes('렙 목표'));
